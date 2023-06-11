@@ -5,8 +5,7 @@
 /* 
 */
 
-let input = require("fs").readFileSync("input.txt").toString().trim(); // 테스트
-let output = "";
-
+let input = require('fs').readFileSync('input.txt',"utf8").trim().split('\n'); // 테스트
+let output = ''; // 출력
 
 console.log(output); // 최대한 console.log 적게 쓰기 ㅋㅋㅋㅋㅋㅋ
