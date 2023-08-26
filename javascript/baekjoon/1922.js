@@ -9,51 +9,59 @@
 let input = require('fs').readFileSync('input.txt',"utf8").toString().trim().split('\n'); // 테스트
 let output = 0;
 
-const N = Number(input[0]); // 컴퓨터의 수
-const M = Number(input[1]); // 연결할 수 있는 선의 수
+let N; // 컴퓨터의 수
+let M; // 연결할 수 있는 선의 수
 
-let network = Array.from(Array(N + 1), () => Array(N + 1).fill(null)) // 네트워크
-for (let index = 2; index < input.length; index++) {
-    const tmp = input[index].toString().trim().split(' ');
-    const a =  Number(tmp[0]);
-    const b =  Number(tmp[1]);
-    const c =  Number(tmp[2]);
+const network = []; // 네트워크
+let count = 0; // 연결 갯수
 
-    network[a][b] = c;
-    network[b][a] = c;
-}
-
-const stack = [];
-const line = [];
-
-stack.push(1); // start
-for (let index = 1; index <= N; index++) {
-    if (network[1][index] !== null) {
-        line.push([index, network[1][index]]);
+input.forEach((value, index) => {
+    if (index === 0) {
+        N = Number(value);
     }
-}
-line.sort((a, b) => {return a[1] - b[1]});
+    if (index === 1) {
+        M = Number(value);
+    }
+    if (index > 1) {
+        const tmp = value.trim().split(' ').map((value) => {return Number(value)});
+        network.push(tmp);
+    }
+})
 
-while (stack.length < N) {
+const group = new Array(N).fill(null); // 그룹
+network.sort((a, b) => {return a[2] - b[2]});
 
-    if (stack.find((element) => {return element === line[0][0]}) === undefined) {
-        var next = line[0][0];
-        output += line[0][1];
-
-        line.shift();
-        stack.push(next);
-
-        for (let index = 1; index <= N; index++) {
-            if (network[next][index] !== null) {
-                line.push([index, network[next][index]]);
-            }
+while (count < N - 1) {
+    const shortNetwork = network.shift();
+    
+    if (shortNetwork[0] - 1 !== shortNetwork[1] - 1) {
+        if (group[shortNetwork[0] - 1] === group[shortNetwork[1] - 1] && group[shortNetwork[0] - 1] === null) {
+            output = output + shortNetwork[2];
+            group[shortNetwork[0] - 1] = count;
+            group[shortNetwork[1] - 1] = count;
+            count = count + 1;
         }
-        line.sort((a, b) => {return a[1] - b[1]});
-
+        else if (group[shortNetwork[0] - 1] !== group[shortNetwork[1] - 1]) {
+            output = output + shortNetwork[2];
+            if (group[shortNetwork[0] - 1] === null) {
+                group[shortNetwork[0] - 1] = group[shortNetwork[1] - 1];
+            }
+            else if(group[shortNetwork[1] - 1] === null) {
+                group[shortNetwork[1] - 1] = group[shortNetwork[0] - 1];
+            }
+            else {
+                const from = group[shortNetwork[0] - 1];
+                for (let index = 0; index < N; index++) {
+                    if (group[index] === from) {
+                        group[index] = group[shortNetwork[1] - 1];
+                    }
+                }
+            }
+            count = count + 1;
+        }
     }
-    else {
-        line.shift();
-    }
+    
 }
+
 
 console.log(output); // 최대한 console.log 적게 쓰기 ㅋㅋㅋㅋㅋㅋ
