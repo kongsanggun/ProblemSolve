@@ -8,44 +8,61 @@
     [투포인터 > 이분탐색]
 */
 
-let input = require('fs').readFileSync('input.txt',"utf8").trim().split('\n'); // 테스트
+let input = require('fs').readFileSync('/dev/stdin').toString().split('\n'); // 테스트
 
 const N = Number(input[0].trim().split(' ')[0]);    // 말뚝의 갯수
 const M = Number(input[0].trim().split(' ')[1]);    // 깃대의 갯수
-const R = Number(input[0].trim().split(' ')[2]) * 2;    // 구입 할 수 있는 최대 현수막 넓이
+const R = Number(input[0].trim().split(' ')[2]);    // 구입 할 수 있는 최대 현수막 넓이
 
 const A = []; // 말뚝의 위치
 const B = []; // 깃대의 길이
+
+let output = -1;
+const distance = [];
 
 for (let index = 0; index < N; index++) {
     A.push(Number(input[1].trim().split(' ')[index]));
 }
 
-A.sort((a, b) => {
-    return a - b;
-}); // 투 포인터용 정렬 
-
-
 for (let index = 0; index < M; index++) {
     B.push(Number(input[2].trim().split(' ')[index]));
 }
 
+// 1. 두 개의 말뚝의 위치의 거리를 전부 구한다.
+for (let index = 0; index < N; index++) {
+    for (let jndex = index + 1; jndex < N; jndex++) {
+        distance.push(Math.abs(A[index] - A[jndex]));
+    }
+}
+
+// 2. 깃대의 길이를 정렬한다.
 B.sort((a, b) => {
     return a - b;
-}); // 투 포인터용 정렬 
+});
 
-let lo = -1;
-let hi = R;
+// 3. 밑변 고정
+for (let index = 0; index < distance.length; index++) {
+    // 3-1. 이분탐색
+    let left = -1;
+    let right = B.length;
 
-// 넓이 mid를 만들 수 있나 
-const Check = (mid) => { 
+    while (left + 1 < right) {
+        let mid = Math.round((left + right) / 2);
+        let area = Math.round(B[mid] * distance[index] / 2 * 10) / 10;
+        if (area <= R) {
+            left = mid;
+        }
+        else {
+            right = mid;
+        }
+    }
 
+    if (left !== -1) {
+        let area = Math.round(B[left] * distance[index] / 2 * 10) / 10;
+        output = (output <= area) ? area : output;
+    }
 }
 
-while (lo + 1 < hi) {
-    let mid = (lo + hi) / 2;
-    if (Check(mid)) lo = mid;
-    else hi = mid;
-}
+output = (output === -1) ? -1 : (output * 10 / 10)
 
 console.log(output); // 최대한 console.log 적게 쓰기 ㅋㅋㅋㅋㅋㅋ
