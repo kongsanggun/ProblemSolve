@@ -2,45 +2,155 @@
 // .split('\n') 행바꿈  // .split(' ') 공백
 // 실행은 node solution (터미널)
 
-// 1006번 : 습격자 초라기
-// DP
+// 1006번
+// 습격자 초라기
 
-let input = require('fs').readFileSync('input.txt').toString().split('\n'); // 테스트
-let output = [];
+let input = require("fs").readFileSync("input.txt").toString().split("\n");
+let output = "";
 
-const solution = (n, w, enemy) => {
-    // 목적 : DP를 활용하여 최솟값을 구한다.
+let emenyList = [];
+let dp = []; // 둘 다 채운 경우
+let upDp = []; // 위에만 채운 경우
+let downDp = []; // 아래에만 채운 경우
 
-    // 1. 결합 여부가 되는 지 판단한다.
-    let abled = [];
+const t = Number(input[0]); // 테스트케이스
 
-    for (let i = 0; i < n; i++) {
-        const rightIndex = (i + 1) % n;
-        const upIndex = i + n;
+const initDp = (n) => {
+  dp = Array.from(Array(n).fill(0));
+  upDp = Array.from(Array(n).fill(0));
+  downDp = Array.from(Array(n).fill(0));
+};
 
-        if ((enemy[i] + enemy[rightIndex]) <= w) {
-            abled.push([i, rightIndex]);
-        }
+const setDp = (i, n, w) => {
+  const isPossableUp = (emenyList[i] + emenyList[i + n]) <= w;
+  const isPossableRight = (emenyList[i - 1] + emenyList[i]) <= w;
+  const isPossableRightSecend = (emenyList[i + n - 1] + emenyList[i + n]) <= w;
 
-        if ((enemy[i] + enemy[upIndex]) <= w) {
-            abled.push([i, upIndex]);
-        }
+  const up = isPossableUp ? 1 : 2;
+  const right = isPossableRight ? 1 : 2;
+  const rightSecend = isPossableRightSecend ? 1 : 2;
+
+  upDp[i] = Math.min(dp[i - 1] + 1, downDp[i - 1] + right);
+  downDp[i] = Math.min(dp[i - 1] + 1, upDp[i - 1] + rightSecend);
+  dp[i] = Math.min(
+    dp[i - 1] + up,
+    dp[i - 2] + right + rightSecend,
+    upDp[i] + 1,
+    downDp[i] + 1
+  );
+};
+
+const solution = (n, w) => {
+  let result = 2 * n + 1;
+
+  initDp(n);
+
+  upDp[1] = 1;
+  downDp[1] = 1;
+  dp[1] = emenyList[1] + emenyList[n + 1] <= w ? 1 : 2;
+
+  for (let i = 2; i <= n; i++) {
+    setDp(i, n, w);
+  }
+
+  result = Math.min(result, dp[n]);
+
+  if (n > 1) {
+    const isPossableRight = emenyList[0] + emenyList[n - 1] <= w;
+    const isPossableRightSecend = emenyList[n] + emenyList[2 * n - 1] <= w;
+
+    const upFirst = emenyList[0];
+    const downFirst = emenyList[n];
+
+    if (isPossableRight) {
+      emenyList[0] = upFirst;
+      emenyList[n] = downFirst;
+
+      initDp(n);
+
+      upDp[1] = 1;
+      downDp[1] = 1;
+      dp[1] = 2;
+
+      emenyList[0] = n * 2 + 1;
+
+      for (let i = 2; i <= n; i++) {
+        setDp(i, n, w);
+      }
+
+      result = Math.min(result, upDp[n]);
     }
 
-    console.log(abled);
+    if (isPossableRightSecend) {
+      emenyList[0] = upFirst;
+      emenyList[n] = downFirst;
+
+      initDp(n);
+
+      upDp[1] = 1;
+      downDp[1] = 1;
+      dp[1] = 2;
+
+      emenyList[n] = n * 2 + 1;
+
+      for (let i = 2; i <= n; i++) {
+        setDp(i, n, w);
+      }
+
+      result = Math.min(result, downDp[n]);
+    }
+
+    if (isPossableRight && isPossableRightSecend) {
+      initDp(n);
+
+      upDp[1] = 1;
+      downDp[1] = 1;
+      dp[1] = 2;
+
+      emenyList[0] = n * 2 + 1;
+      emenyList[n] = n * 2 + 1;
+
+      for (let i = 2; i <= n; i++) {
+        setDp(i, n, w);
+      }
+
+      result = Math.min(result, dp[n - 1]);
+    }
+    
+  }
+
+  return result;
+};
+
+const setEmenyList = (frontInput, backInput) => {
+  let result = [];
+
+  const frontEmeny = frontInput.split(" ").map((value) => {
+    return Number(value);
+  });
+  const backEmeny = backInput.split(" ").map((value) => {
+    return Number(value);
+  });
+
+  result = result.concat([...frontEmeny]);
+  result = result.concat([...backEmeny]);
+
+  return result;
+};
+
+for (let test = 0; test < t; test++) {
+  const info = input[test * 3 + 1].split(" ").map((value) => {
+    return Number(value);
+  });
+  const n = info[0]; // 총 방의 수
+  const w = info[1]; // 특수 부대의 수
+
+  // 배치 된 적
+  emenyList = setEmenyList(input[test * 3 + 2], input[test * 3 + 3]);
+  output = output + solution(n, w);
+  if (test != t - 1) {
+    output = output + "\n";
+  }
 }
 
-let t = Number(input[0]);
-
-for (let testcase = 0; testcase < t; testcase++) {
-    const inputLine = input[testcase * 3 + 1].split(' ');
-    const n = Number(inputLine[0]);
-    const w = Number(inputLine[1]);
-
-    let enemy = input[testcase * 3 + 2] + ' ' + input[testcase * 3 + 3];
-    enemy = enemy.split(' ').map((value) => {return Number(value)});
-
-    solution(n, w, enemy);
-}
-
-console.log(output.join('\n')); // 최대한 console.log 적게 쓰기 ㅋㅋㅋㅋㅋㅋ
+console.log(output);
