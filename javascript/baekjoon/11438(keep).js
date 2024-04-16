@@ -35,7 +35,7 @@ for (let index = 1; index < N; index++) {
 // 트리 정리하기
 let queue = [1];
 let queueIndex = 0;
-tree[1].parent = 1;
+tree[1].parent = -1;
 
 while (queue.length > queueIndex) {
   const top = queue[queueIndex];
@@ -60,6 +60,8 @@ for (let row = 1; row < table.length; row++) {
   for (let col = 1; col <= N; col++) {
     if (row === 1) {
       table[row][col] = tree[col].parent;
+    } else if (table[row - 1][col] === -1){
+      table[row][col] = -1
     } else {
       table[row][col] = table[row - 1][table[row - 1][col]];
     }
@@ -104,13 +106,16 @@ for (let index = N + 1; index <= N + M; index++) {
     }
   }
 
-  // TODO : 시간복잡도 최적화
-  while (A != B) {
-    A = tree[A].parent;
-    B = tree[B].parent;
+  let count = table.length - 2;
+  while (count >= 0) {
+    if(table[count][A] !== table[count][B]) {
+      A = table[count + 1][A];
+      B = table[count + 1][B];
+    }
+    count--;
   }
 
-  output.push(A);
+  output.push(table[0][A]);
 }
 
 console.log(output.join("\n")); // 최대한 console.log 적게 쓰기 ㅋㅋㅋㅋㅋㅋ
