@@ -106,16 +106,19 @@ for (let index = N + 1; index <= N + M; index++) {
     }
   }
 
-  let count = table.length - 2;
-  while (count >= 0) {
-    if(table[count][A] !== table[count][B]) {
-      A = table[count + 1][A];
-      B = table[count + 1][B];
+  if(A !== B) {
+    for(let index = table.length - 1; index > 0; index--) {
+      if (table[index][A] !== table[index][B])
+      {
+          A = table[index][A];
+          B = table[index][B];
+      }
     }
-    count--;
+    output.push(table[1][A]);
+  } else {
+    output.push(table[0][A]);
   }
-
-  output.push(table[0][A]);
+  
 }
 
 console.log(output.join("\n")); // 최대한 console.log 적게 쓰기 ㅋㅋㅋㅋㅋㅋ

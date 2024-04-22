@@ -1,4 +1,9 @@
 .vscode
+.idea
+
+out
 *.txt
 solution.py
 solution.js
+Main.java
+Algorithm.iml
