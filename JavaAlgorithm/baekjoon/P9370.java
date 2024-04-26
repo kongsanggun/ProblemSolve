@@ -33,7 +33,7 @@ public class P9370 {
     // 입력 가져오기
     public static String[] getInput() throws Exception {
         List<String> input = new ArrayList<String>();
-        File note = new File("/Users/kongsanghyean/Desktop/Algorithm/JavaAlgorithm/input.txt");
+        File note = new File("");
         BufferedReader br = new BufferedReader(new FileReader(note));
 
         String str = br.readLine();
